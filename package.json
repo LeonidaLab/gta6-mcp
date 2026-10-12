@@ -1,0 +1,26 @@
+{
+  "name": "leonidalab-gta6-mcp",
+  "version": "1.0.0",
+  "description": "MCP server: GTA 6 facts, official or not. Every answer carries its status (official, reported or not announced), its source and a link. Unofficial, not affiliated with Rockstar Games or Take-Two.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Leonida Lab <hello@leonidalab.com> (https://leonidalab.com)",
+  "homepage": "https://leonidalab.com/mcp-server/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LeonidaLab/gta6-mcp.git"
+  },
+  "mcpName": "com.leonidalab/gta6-facts",
+  "keywords": ["mcp", "model-context-protocol", "mcp-server", "gta6", "gta-vi", "grand-theft-auto", "video-games", "fact-checking", "prices"],
+  "bin": {
+    "gta6-mcp": "stdio.mjs"
+  },
+  "files": ["stdio.mjs", "src", "server.json"],
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.3.1",
+    "zod": "^4.2.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

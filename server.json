@@ -1,0 +1,25 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.leonidalab/gta6-facts",
+  "title": "Leonida Lab: GTA 6 facts, official or not",
+  "description": "Unofficial GTA 6 facts tagged official or reported. Not affiliated with Rockstar Games or Take-Two.",
+  "version": "1.0.0",
+  "websiteUrl": "https://leonidalab.com/mcp-server/",
+  "repository": {
+    "url": "https://github.com/LeonidaLab/gta6-mcp",
+    "source": "github"
+  },
+  "icons": [
+    {
+      "src": "https://leonidalab.com/icon-512.png",
+      "mimeType": "image/png",
+      "sizes": ["512x512"]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://leonidalab.com/mcp"
+    }
+  ]
+}
