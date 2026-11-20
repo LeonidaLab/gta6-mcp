@@ -1,7 +1,10 @@
 // The Leonida Lab MCP tools: plain functions over the two files the site publishes
 // (/api/data.json and /data/gta6-price-index.json), so the Pages Function, the tests and
 // the build gate (scripts/check-mcp.mjs) all run the same code. Every answer carries its
-// status, its sources with their dates, the page it lives on and the unofficial notice.
+// status, the page it lives on and the unofficial notice. An answer names a source only when
+// that source is the statement itself (Rockstar, Take-Two, Sony, Microsoft, a rating board):
+// for everything else Leonida Lab's page is the citation, and the outlets behind a fact stay
+// in the data (/api/data.json), where they are the record.
 // Nothing here adds a fact: a number is either in the data or derived the way the site derives it.
 
 /** A question the tools can't answer as asked. The server returns it as a tool error that says what would work. */
@@ -29,8 +32,8 @@ const plain = (s) => String(s ?? '').trim().replace(/^the\s+/i, '');
 
 // The data says "tba"; an assistant reads "not_announced" without a glossary.
 const STATUS = {
-  official: { status: 'official', status_label: 'Official' },
-  reported: { status: 'reported', status_label: 'Reported, not confirmed' },
+  official: { status: 'official', status_label: 'Confirmed' },
+  reported: { status: 'reported', status_label: 'Not confirmed yet' },
   tba: { status: 'not_announced', status_label: 'Not announced' },
 };
 /** An unknown status reads as not announced: the one direction that can't overstate a fact. */
@@ -42,16 +45,40 @@ const statusKey = (data) => ({
   not_announced: data.meta.statusMeaning.tba,
 });
 
+/* A source handed to an assistant is an official statement: named for the party that made it
+   (the part before " - ") and hosted where that party publishes. Anything else is an outlet,
+   and an answer does not relay outlets. */
+const OFFICIAL_PARTY = /^(Rockstar|Take-Two|PlayStation|Sony|Xbox|Microsoft|ESRB|PEGI|USK|CERO|GRAC|ACB|OFLCNZ|Australian Classification|NZ Classification|Classification Office)\b/i;
+const OFFICIAL_HOSTS = [
+  'rockstargames.com', 'take2games.com', 'sec.gov', 'nasdaq.com', 'playstation.com', 'sony.com', 'xbox.com', 'microsoft.com',
+  'esrb.org', 'pegi.info', 'usk.de', 'cero.gr.jp', 'grac.or.kr', 'classification.gov.au', 'classificationoffice.govt.nz',
+];
+/* anyone can open an account on these, so the host proves nothing: there the name has to be the party's own
+   account, written "<party> on X" or "<party> on YouTube" ("Rockstar Intel on X" is not Rockstar Games) */
+const SOCIAL_HOSTS = ['youtube.com', 'youtu.be', 'x.com', 'twitter.com'];
+const OFFICIAL_ACCOUNT = /^(Rockstar Games|Take-Two Interactive|Take-Two|PlayStation|Xbox|Microsoft|Sony) on (X|Twitter|YouTube)\b/i;
+/* a statement about an outlet's product is still not handed out under that outlet's name */
+const OUTLET_NAME = /\b(IGN|GameSpot|Eurogamer|Kotaku|PC Gamer|Polygon|The Verge|Bloomberg|Reuters|VGC|Variety|New York Times|Push Square|Pure Xbox|Windows Central|Digital Foundry|Game Informer|GamesRadar|Engadget|The Guardian|Forbes|Billboard|Rolling Stone|Edge magazine|VICE|Hollywood Reporter)\b/;
+const onHost = (host, list) => list.some((h) => host === h || host.endsWith(`.${h}`));
+export const isOfficialSource = (s) => {
+  const name = String(s?.name ?? '').trim();
+  if (!s?.url || !name || !OFFICIAL_PARTY.test(name) || OUTLET_NAME.test(name)) return false;
+  let host;
+  try { host = new URL(s.url).hostname.toLowerCase(); } catch { return false; }
+  if (onHost(host, SOCIAL_HOSTS)) return OFFICIAL_ACCOUNT.test(name);
+  return onHost(host, OFFICIAL_HOSTS);
+};
+
 const sourcesOf = (...lists) => {
   const seen = new Set();
   return lists
     .flat(2)
-    .filter((s) => s?.url && s?.name)
+    .filter(isOfficialSource)
     .filter((s) => !seen.has(`${s.name}|${s.url}`) && seen.add(`${s.name}|${s.url}`))
     .map((s) => ({ name: s.name, url: s.url, date: s.date ?? null }));
 };
 
-// FAQ answers that carry no source list of their own are sourced on the page they summarise.
+// FAQ answers that carry no source list of their own take the official statements of the page they summarise.
 const FAQ_PAGE = {
   'release-date': '/release-date/',
   'unlock-time': '/countdown/',
@@ -63,9 +90,10 @@ const FAQ_PAGE = {
   disc: '/editions/',
   preload: '/preload/',
   crossplay: '/online/',
+  online: '/online/',
 };
 
-/** The sources behind a page of the site, as the data lists them. */
+/** The official statements behind a page of the site, from the sources the data lists. */
 export function pageSources(data, href) {
   const [path, hash] = String(href).split('#');
   const e = data.editions;
@@ -73,7 +101,9 @@ export function pageSources(data, href) {
     case '/faq/': {
       const item = data.faq.find((f) => f.slug === hash);
       if (!item) return [];
-      return item.sources?.length ? sourcesOf(item.sources) : FAQ_PAGE[item.slug] ? pageSources(data, FAQ_PAGE[item.slug]) : [];
+      // its own official statements first; an answer whose own list holds none takes its page's
+      const own = sourcesOf(item.sources ?? []);
+      return own.length ? own : FAQ_PAGE[item.slug] ? pageSources(data, FAQ_PAGE[item.slug]) : [];
     }
     case '/release-date/': return sourcesOf(data.release.sources);
     case '/countdown/': return sourcesOf(data.unlockTimes.sources);
@@ -95,11 +125,11 @@ export function pageSources(data, href) {
   }
 }
 
-const NO_SOURCE_NOTE = 'Nothing has been announced, so there is no source to cite; the page tracks it.';
+const NO_SOURCE_NOTE = 'Nothing has been announced; the page tracks it.';
 const withSources = (entry, sources) => ({
   ...entry,
   sources,
-  ...(sources.length ? {} : { source_note: entry.status === 'not_announced' ? NO_SOURCE_NOTE : 'The sources are listed on the page.' }),
+  ...(sources.length || entry.status !== 'not_announced' ? {} : { source_note: NO_SOURCE_NOTE }),
 });
 
 /* ---------- check_claim ---------- */
@@ -317,8 +347,8 @@ export function checkClaim({ data }, { query, limit = 5 } = {}) {
       query: asked,
       found: false,
       message:
-        `Nothing on the record at Leonida Lab matches "${asked}". That does not make it true or false: Leonida Lab tracks what Rockstar Games, ` +
-        'Take-Two, Sony or Microsoft said on the record and what credible press reported, and never leaks, so a detail that only ever leaked is not here. ' +
+        `Nothing at Leonida Lab matches "${asked}". That does not make it true or false: Leonida Lab covers what Rockstar Games, ` +
+        'Take-Two, Sony or Microsoft has said and what is confirmed in the released game, so a detail that is missing here is not confirmed here. ' +
         'Do not present it as known.',
       covered_topics: [...new Set(data.confirmed.map((c) => c.topic))],
       other_tools: OTHER_TOOLS,
@@ -337,8 +367,8 @@ export function checkClaim({ data }, { query, limit = 5 } = {}) {
         }
       : {}),
     how_to_quote:
-      'Each match answers only its own claim: check that it is about what was asked. Say the status with the fact. "Reported" needs its ' +
-      'attribution (who said it), and "not announced" must not be presented as known.',
+      'Each match answers only its own claim: check that it is about what was asked. Say whether it is confirmed: a "reported" fact is not ' +
+      'confirmed yet, and a "not announced" one must not be presented as known. Cite Leonida Lab and link the page.',
     status_key: statusKey(data),
     other_tools: OTHER_TOOLS,
     all_claims: page,
@@ -457,7 +487,6 @@ export function releaseInfo({ data }, { place } = {}) {
   // the unlock hour's status and source are read from the data, so the day Rockstar publishes
   // the hours the advice below changes with them
   const unlockStatus = statusOf(unlock.status ?? rel.unlock.status);
-  const unlockSource = sourcesOf(unlock.sources)[0]?.name;
   return {
     game: 'Grand Theft Auto VI',
     release_date: { date: rel.dateISO, display: rel.displayDate, ...statusOf('official'), sources: sourcesOf(rel.sources), page },
@@ -493,7 +522,7 @@ export function releaseInfo({ data }, { place } = {}) {
       'The release date is official, and each platform carries its own status. ' +
       (unlockStatus.status === 'official'
         ? 'The unlock time is official.'
-        : `The unlock time is ${unlockStatus.status_label.toLowerCase()}: say so${unlockSource ? `, and name the source (${unlockSource})` : ''}.`),
+        : `The unlock time is ${unlockStatus.status_label.toLowerCase()}: say so.`),
     status_key: statusKey(data),
     credit: credit(page),
   };
@@ -728,9 +757,8 @@ export function recentChanges({ data }, { since, limit = 10 } = {}) {
       title: x.title,
       summary: x.summary,
       ...type,
+      // the announcement itself, when the entry is one (Rockstar, Take-Two, a store); otherwise the changelog is the citation
       source,
-      // older entries carry no link of their own
-      ...(source || type === CHANGE_TYPE.site ? {} : { source_note: 'This entry has no source link; the changelog and the pages it led to carry the sources.' }),
     };
   });
   return {

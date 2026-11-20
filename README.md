@@ -6,7 +6,7 @@ Ask Claude, ChatGPT, Cursor or any MCP client about GTA 6 (Grand Theft Auto VI) 
 - **Reported**: credible press has it, nobody official has confirmed it.
 - **Not announced**: nobody official has said anything.
 
-Each answer also carries its source, the source's date and a link to the page. Assistants get GTA 6 wrong all the time (a PC date, a 60 FPS mode, a local price); this is the fix.
+Each answer also carries a link to the page to cite, and the official statement itself where Rockstar, Take-Two, Sony or Microsoft made one. Assistants get GTA 6 wrong all the time (a PC date, a 60 FPS mode, a local price); this is the fix.
 
 Free, read-only, no account.
 
@@ -43,11 +43,11 @@ https://leonidalab.com/mcp
 
 | Tool | Answers |
 |---|---|
-| `check_claim` | Is it confirmed? Checks a claim (a PC version, 60 FPS, online at launch, a disc, crossplay, map size, story length and more) against the tracked claims, the FAQ and the PC, frame rate, online and length pages. Each match comes back official, reported or not announced, with its sources. A miss says what is covered and guesses nothing. |
-| `release_info` | The release date, the platforms, the unlock time in each region or in the place you name, and the dates around launch. The unlock hour carries its own status (a press report until Rockstar publishes it), and the answer says which. |
+| `check_claim` | Is it confirmed? Checks a claim (a PC version, 60 FPS, online at launch, a disc, crossplay, map size, story length and more) against the tracked claims, the FAQ and the PC, frame rate, online and length pages. Each match comes back official, reported or not announced, with the page to cite. A miss says what is covered and guesses nothing. |
+| `release_info` | The release date, the platforms, the unlock time in each region or in the place you name, and the dates around launch. The unlock hour carries its own status, and the answer says which. |
 | `price_in_country` | What a buyer pays at checkout in one country, Standard and Ultimate, on the PlayStation Store and the Xbox Store, with the US dollar value. Tax is included where the store adds one national rate; where the rate varies or could not be confirmed, the price is labelled and never called cheaper. |
 | `compare_editions` | Standard against Ultimate, every Ultimate bonus as Rockstar lists it, the pre-order bonus and its deadline, and the fact that there is no disc. |
-| `recent_changes` | What changed on the record, newest first. Optionally since a date. |
+| `recent_changes` | What changed, newest first. Optionally since a date. |
 
 All tools are read-only.
 
@@ -68,7 +68,7 @@ All tools are read-only.
 
 The answers come from the same data as every page on leonidalab.com: [/api/data.json](https://leonidalab.com/api/data.json) and the [GTA VI Global Price Index](https://leonidalab.com/data/price-index/), rebuilt with each update.
 
-- **No leaks, ever.** Only what is on the record or credibly reported, each tagged as such ([the no-leaks policy](https://leonidalab.com/no-leaks/)). A detail that only ever leaked is answered with "not on the record".
+- **No leaks, ever.** A detail that is not in the data is answered as not there, never guessed ([editorial policy](https://leonidalab.com/no-leaks/)).
 - **No guessed numbers.** A figure is either in the data or derived the way the site derives it (a price with the store's own tax rate added, a midnight converted to UTC).
 - **Price data:** [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), also on GitHub as [LeonidaLab/gta6-price-index](https://github.com/LeonidaLab/gta6-price-index). Credit Leonida Lab and link the page.
 - **Code:** MIT.
@@ -78,4 +78,4 @@ The hosted endpoint runs this code (`src/`) as a Cloudflare Pages Function. It i
 
 ---
 
-Made by [Leonida Lab](https://leonidalab.com/), the GTA VI database where every fact is tagged and cites its source. Grand Theft Auto and related marks are trademarks of Take-Two Interactive.
+Made by [Leonida Lab](https://leonidalab.com/), the GTA VI hub: database, trackers and calculators in one place. Grand Theft Auto and related marks are trademarks of Take-Two Interactive.
