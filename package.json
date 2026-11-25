@@ -1,7 +1,7 @@
 {
   "name": "leonidalab-gta6-mcp",
-  "version": "1.0.0",
-  "description": "MCP server: GTA 6 facts, official or not. Every answer carries its status (official, reported or not announced), its source and a link. Unofficial, not affiliated with Rockstar Games or Take-Two.",
+  "version": "1.1.0",
+  "description": "MCP server: GTA 6 facts, official or not, and the database of the released game. Every answer carries its status and a link to the page to cite. Unofficial, not affiliated with Rockstar Games or Take-Two.",
   "type": "module",
   "license": "MIT",
   "author": "Leonida Lab <hello@leonidalab.com> (https://leonidalab.com)",

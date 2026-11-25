@@ -11,11 +11,11 @@
 export class ToolInputError extends Error {}
 
 export const SITE = 'https://leonidalab.com';
-const DISCLAIMER =
+export const DISCLAIMER =
   'Unofficial: Leonida Lab is a fan resource, not affiliated with Rockstar Games or Take-Two Interactive. It publishes no leaked material.';
 
-const url = (href) => `${SITE}${href}`;
-const credit = (page) => `Source: Leonida Lab (${page}). ${DISCLAIMER}`;
+export const url = (href) => `${SITE}${href}`;
+export const credit = (page) => `Source: Leonida Lab (${page}). ${DISCLAIMER}`;
 const r1 = (n) => Math.round(n * 10) / 10;
 const r2 = (n) => Math.round(n * 100) / 100;
 
@@ -117,7 +117,8 @@ export function pageSources(data, href) {
     case '/how-long-to-beat/': return sourcesOf(data.storyLength.sources);
     case '/soundtrack/': return sourcesOf(data.soundtrack.sources);
     case '/gameplay/': return hash === 'game-informer' ? sourcesOf(data.gameplay.coverStory?.sources) : sourcesOf(data.gameplay.showcase?.sources);
-    case '/characters/': return sourcesOf(data.collectionSources?.characters);
+    case '/characters/': return sourcesOf(data.collectionSources?.characters, (data.characters ?? []).flatMap((c) => (c.facts ?? []).filter((f) => f.label === 'Voice').map((f) => f.source)));
+    case '/radio/': return sourcesOf(data.radioSource);
     case '/locations/': return sourcesOf(data.collectionSources?.locations);
     case '/vehicles/': return sourcesOf(data.collectionSources?.vehicles);
     case '/preload/': return sourcesOf((data.keyDates ?? []).filter((k) => k.href === '/preload/').map((k) => k.sources));
@@ -296,7 +297,9 @@ function claimIndex(data) {
   return ix;
 }
 
-const OTHER_TOOLS = 'release_info has dates, platforms and unlock times; price_in_country has prices by country; compare_editions has the editions; recent_changes has the news.';
+const OTHER_TOOLS =
+  'search_database looks up how-to questions and the database of the released game (get_entry reads one row); release_info has dates, platforms and unlock times; ' +
+  'price_in_country has prices by country; compare_editions has the editions; recent_changes has the news.';
 
 export function checkClaim({ data }, { query, limit = 5 } = {}) {
   const asked = String(query ?? '').trim();

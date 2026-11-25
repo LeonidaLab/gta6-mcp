@@ -10,6 +10,8 @@ Each answer also carries a link to the page to cite, and the official statement 
 
 Free, read-only, no account.
 
+The database tools (`search_database`, `get_entry`) use their own three words: **Confirmed**, **Confirmed in the released game** and **Not confirmed yet**.
+
 - **Website:** [leonidalab.com](https://leonidalab.com/), the GTA VI database, trackers and calculators
 - **Setup guide:** [leonidalab.com/mcp-server](https://leonidalab.com/mcp-server/)
 
@@ -48,6 +50,8 @@ https://leonidalab.com/mcp
 | `price_in_country` | What a buyer pays at checkout in one country, Standard and Ultimate, on the PlayStation Store and the Xbox Store, with the US dollar value. Tax is included where the store adds one national rate; where the rate varies or could not be confirmed, the price is labelled and never called cheaper. |
 | `compare_editions` | Standard against Ultimate, every Ultimate bonus as Rockstar lists it, the pre-order bonus and its deadline, and the fact that there is no disc. |
 | `recent_changes` | What changed, newest first. Optionally since a date. |
+| `search_database` | Searches the database of the released game: the answers to what players ask (how to save, how to lose the police), vehicles, weapons, animals, safes and locks with their codes, radio stations, cheat codes, controls, ways to make money, trophies and the 100% list. Every hit has the page to cite and, except a story spoiler, its status. A story spoiler is flagged and never summarised. |
+| `get_entry` | The whole entry for one hit, by the kind and slug `search_database` gives: what its page states, its status and the page to cite. A hidden trophy is kind `trophy` with the slug `hidden-<number>`. |
 
 All tools are read-only.
 
@@ -59,6 +63,10 @@ All tools are read-only.
 - How much is GTA 6 in Brazil, tax included?
 - What do I get with the Ultimate Edition?
 - What changed about GTA 6 this month?
+- How do I save my game in GTA 6?
+- Where do I get the Cheetah?
+- What does the Kalinga pistol do?
+- What is the cheat code for infinite ammo?
 
 ## The pages behind the answers
 
